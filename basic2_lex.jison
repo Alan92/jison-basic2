@@ -5,33 +5,36 @@
 %%
 
 \s+               {/* skip whitespace */}
-[a-zA-Z_]\w*      {return 'x';}
+[a-zA-Z_]\w*      {return 'ID';}
 [+-]?[0-9]+("."[0-9]+)?\b  {return 'NUMBER';}
-"="               {return '=';}
-";"               {return ';';}
-/lex
-%rigth '='
-%%
+"="               {return yytext;}
+";"               {return yytext;}
 
+/lex
+%{
+var tabla = {};
+%}
+%%
 S   : A
-	   { return $$; }
+	   { var tabla_aux = JSON.stringify(tabla,undefined,2);
+				return tabla_aux;
+}
     ;
 A   : /* empty */  
-           { 
-              console.log("starting"); 
+           {  
               $$ = 0; 
            }
-    | C '=' B ';' A
-	    { 
-               $$ = $1 + $2 + $3 + $5;  
-              console.log($$)
-	    }
+    | E
+    | E ';' A
     ;
 
-B :	NUMBER
-	    {$$ = "Valor " + yytext ;};
+B :  NUMBER
+     ;
 	
-C: 	x 
-	    {$$ = "Clave " + yytext;}  
-    ;
+C:   ID 
+     ;
+E:   C '=' B  
+           {tabla[$1] = $$ = $3;}  
+     ;
+  
   
